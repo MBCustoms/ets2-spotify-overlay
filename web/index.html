@@ -1,0 +1,401 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ETS2/ATS - Spotify Overlay</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Ana Ekran Kabı */
+        .carplay-container {
+			width: 800px;
+			height: 480px;
+			background-color: #1a1a1a; /* Resim gelene kadar siyah/gri kalsın */
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			border-radius: 20px;
+			overflow: hidden;
+			display: flex;
+			position: relative;
+			box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+			transition: background-image 0.5s ease-in-out; /* Geçiş efekti */
+		}
+
+        /* Cam Efekti Katmanı */
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(25px);
+            display: flex;
+        }
+
+        /* Sol Taraf: Albüm Görseli */
+        .album-art-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-left: 40px;
+        }
+
+        .album-cover {
+            width: 300px;
+            height: 300px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            object-fit: cover;
+            background: #1a1a1a;
+        }
+
+        .album-cover-placeholder {
+            width: 300px;
+            height: 300px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .album-cover-placeholder i {
+            font-size: 100px;
+            color: #1DB954;
+        }
+
+        /* Sağ Taraf: Kontroller ve Metin */
+        .controls-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 50px;
+        }
+
+        .track-info h1 { 
+            font-size: 32px; 
+            margin-bottom: 5px; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .track-info p { 
+            font-size: 20px; 
+            color: #b3b3b3; 
+            margin-bottom: 40px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .connection-status {
+            font-size: 14px;
+            color: #b3b3b3;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-status.connected {
+            color: #1DB954;
+        }
+
+        .connection-status.disconnected {
+            color: #ff4444;
+        }
+
+        .connection-status i {
+            font-size: 12px;
+        }
+
+        /* Progress Bar */
+        .progress-container { width: 100%; margin-bottom: 30px; }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress-current {
+            height: 100%;
+            background: #1DB954;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        /* Butonlar */
+        .playback-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            opacity: 0.8;
+        }
+
+        .btn:hover {
+            opacity: 1;
+        }
+
+        .btn-play {
+            width: 70px;
+            height: 70px;
+            background: white;
+            color: black;
+            border-radius: 50%;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+        }
+
+        .btn:active { transform: scale(0.9); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .loading {
+            text-align: center;
+            color: #b3b3b3;
+            font-size: 18px;
+            margin-top: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="carplay-container">
+    <div class="overlay">
+        <div class="album-art-section" id="albumSection">
+            <div class="album-cover-placeholder" id="albumPlaceholder">
+                <i class="fas fa-music"></i>
+            </div>
+            <img id="albumCover" class="album-cover" style="display: none;" alt="Album Art">
+        </div>
+
+        <div class="controls-section">
+            <div class="connection-status" id="connectionStatus">
+                <i class="fas fa-circle"></i>
+                <span>Connecting...</span>
+            </div>
+
+            <div class="track-info">
+                <h1 id="trackName">-</h1>
+                <p id="artistName">-</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-current" id="progressCurrent"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="totalTime">0:00</span>
+                </div>
+            </div>
+
+            <div class="playback-controls">
+                <button class="btn" id="btnShuffle" title="Shuffle" disabled><i class="fas fa-random"></i></button>
+                <button class="btn" id="btnPrevious" title="Previous" disabled><i class="fas fa-step-backward"></i></button>
+                <button class="btn btn-play" id="btnPlayPause" title="Play/Pause" disabled>
+                    <i class="fas fa-play" id="playIcon"></i>
+                </button>
+                <button class="btn" id="btnNext" title="Next" disabled><i class="fas fa-step-forward"></i></button>
+                <button class="btn" id="btnRepeat" title="Repeat" disabled><i class="fas fa-redo"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let updateInterval = null;
+    const API_ENDPOINT = '/spotify';
+
+    // Format time from milliseconds to MM:SS
+    function formatTime(ms) {
+        if (!ms || ms < 0) return '0:00';
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Update UI with Spotify data
+    function updateUI(data) {
+        const trackNameEl = document.getElementById('trackName');
+        const artistNameEl = document.getElementById('artistName');
+        const albumCoverEl = document.getElementById('albumCover');
+        const albumPlaceholderEl = document.getElementById('albumPlaceholder');
+        const connectionStatusEl = document.getElementById('connectionStatus');
+        const progressCurrentEl = document.getElementById('progressCurrent');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const playIconEl = document.getElementById('playIcon');
+        const btnPlayPauseEl = document.getElementById('btnPlayPause');
+		const carplayContainer = document.querySelector('.carplay-container');
+
+        // Update connection status - check both 'isConnected' and 'connected' properties
+        const isConnected = data.isConnected || data.connected || false;
+        
+        if (isConnected && data.track) {
+            connectionStatusEl.className = 'connection-status connected';
+            connectionStatusEl.innerHTML = '<i class="fas fa-circle"></i><span>Connected to Spotify</span>';
+            
+            // Enable controls when connected
+            document.getElementById('btnPlayPause').disabled = false;
+            
+            // Update track info
+            if (data.track && data.track.trim() !== '') {
+                trackNameEl.textContent = data.track;
+            } else {
+                trackNameEl.textContent = '-';
+            }
+
+            if (data.artist && data.artist.trim() !== '') {
+                artistNameEl.textContent = data.artist;
+            } else {
+                artistNameEl.textContent = '-';
+            }
+
+            // Update album cover
+            if (data.coverUrl && data.coverUrl.trim() !== '') {
+                albumCoverEl.src = data.coverUrl;
+                albumCoverEl.onload = function() {
+                    albumPlaceholderEl.style.display = 'none';
+                    albumCoverEl.style.display = 'block';
+					carplayContainer.style.backgroundImage = `url('${data.coverUrl}')`;
+                };
+                albumCoverEl.onerror = function() {
+                    albumPlaceholderEl.style.display = 'flex';
+                    albumCoverEl.style.display = 'none';
+					carplayContainer.style.backgroundImage = 'none';
+                };
+            } else {
+                albumPlaceholderEl.style.display = 'flex';
+                albumCoverEl.style.display = 'none';
+				carplayContainer.style.backgroundImage = 'none';
+            }
+
+            // Update progress bar
+            const progressMs = data.progressMs || 0;
+            const durationMs = data.durationMs || 0;
+            
+            if (durationMs > 0) {
+                const progressPercent = (progressMs / durationMs) * 100;
+                progressCurrentEl.style.width = Math.min(100, Math.max(0, progressPercent)) + '%';
+                currentTimeEl.textContent = formatTime(progressMs);
+                totalTimeEl.textContent = formatTime(durationMs);
+            } else {
+                progressCurrentEl.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+                totalTimeEl.textContent = '0:00';
+            }
+
+            // Update play/pause button
+            if (data.isPlaying) {
+                playIconEl.className = 'fas fa-pause';
+                btnPlayPauseEl.title = 'Pause';
+            } else {
+                playIconEl.className = 'fas fa-play';
+                btnPlayPauseEl.title = 'Play';
+            }
+        } else {
+            connectionStatusEl.className = 'connection-status disconnected';
+            connectionStatusEl.innerHTML = '<i class="fas fa-circle"></i><span>Not Connected</span>';
+            
+            // Disable controls when not connected
+            document.getElementById('btnPlayPause').disabled = true;
+            
+            // Reset UI
+            trackNameEl.textContent = '-';
+            artistNameEl.textContent = '-';
+            albumPlaceholderEl.style.display = 'flex';
+            albumCoverEl.style.display = 'none';
+            progressCurrentEl.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+            totalTimeEl.textContent = '0:00';
+            playIconEl.className = 'fas fa-play';
+        }
+    }
+
+    // Fetch Spotify data from API
+    async function fetchSpotifyData() {
+        try {
+            const response = await fetch(API_ENDPOINT);
+            if (!response.ok) {
+                throw new Error('Failed to fetch Spotify data');
+            }
+            const data = await response.json();
+            updateUI(data);
+        } catch (error) {
+            console.error('Error fetching Spotify data:', error);
+            const connectionStatusEl = document.getElementById('connectionStatus');
+            connectionStatusEl.className = 'connection-status disconnected';
+            connectionStatusEl.innerHTML = '<i class="fas fa-circle"></i><span>Connection Error</span>';
+        }
+    }
+
+    // Start polling for Spotify data
+    function startPolling() {
+        // Initial fetch
+        fetchSpotifyData();
+        
+        // Update every 1 second for smooth progress bar
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+        updateInterval = setInterval(fetchSpotifyData, 1000);
+    }
+
+    // Stop polling
+    function stopPolling() {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+            updateInterval = null;
+        }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        startPolling();
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        stopPolling();
+    });
+</script>
+
+</body>
+</html>

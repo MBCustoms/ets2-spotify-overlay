@@ -1,0 +1,53 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files
+*.cs text diff=csharp eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+*.config text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.resx text eol=lf
+*.settings text eol=lf
+*.manifest text eol=lf
+
+# Web files
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.svg text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.rtf text eol=lf
+
+# Custom for Visual Studio
+*.cs diff=csharp
+
+# Standard to msysgit
+*.doc diff=astextplain
+*.DOC diff=astextplain
+*.docx diff=astextplain
+*.DOCX diff=astextplain
+*.dot diff=astextplain
+*.DOT diff=astextplain
+*.pdf diff=astextplain
+*.PDF diff=astextplain
+*.rtf diff=astextplain
+*.RTF diff=astextplain
+
+# Binary files
+*.dll binary
+*.exe binary
+*.pdb binary
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.mp3 binary
+*.wav binary
+*.snk binary
