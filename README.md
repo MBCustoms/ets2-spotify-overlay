@@ -19,7 +19,7 @@ ETS2/ATS Spotify Overlay is a Windows application that displays Spotify music in
 ## **Installation**
 
 1. Clone or download the project:  
-   git clone \[https://github.com/MBCustoms/ets2-spotify-overlay.git\](https://github.com/MBCustoms/ets2-spotify-overlay.git)  
+   git clone [https://github.com/MBCustoms/ets2-spotify-overlay.git](https://github.com/MBCustoms/ets2-spotify-overlay.git)
    cd ets2-spotify-overlay
 
 2. Open the server/ETS2 Spotify Overlay.sln file with Visual Studio 2019 or later.  
