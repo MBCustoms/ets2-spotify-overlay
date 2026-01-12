@@ -159,3 +159,12 @@ desktop.ini
 # Project specific
 *.psd
 overlay_double.psd
+
+# Plugins yapısını tut
+!plugins/
+!plugins/bin/
+!plugins/bin/win_x64/
+!plugins/bin/win_x64/plugins/
+
+# SADECE bu klasördeki dll'leri dahil et
+!plugins/bin/win_x64/plugins/*.dll
