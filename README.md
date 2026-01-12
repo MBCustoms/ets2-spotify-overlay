@@ -20,16 +20,17 @@ ETS2/ATS Spotify Overlay is a Windows application that displays Spotify music in
 
 1. Clone or download the project:  
    git clone [https://github.com/MBCustoms/ets2-spotify-overlay.git](https://github.com/MBCustoms/ets2-spotify-overlay.git)
+   
    cd ets2-spotify-overlay
 
-2. Open the server/ETS2 Spotify Overlay.sln file with Visual Studio 2019 or later.  
-3. Restore NuGet packages:  
+3. Open the server/ETS2 Spotify Overlay.sln file with Visual Studio 2019 or later.  
+4. Restore NuGet packages:  
    * In Visual Studio: Tools \> NuGet Package Manager \> Restore NuGet Packages  
    * Or via command line: nuget restore  
-4. Build the project (Release or Debug).  
-5. Run ETS2 Spotify Overlay.exe.  
-6. Click the "Install plugin" button to install the game plugin.  
-7. Click the "Connect to Spotify" button to link your account.
+5. Build the project (Release or Debug).  
+6. Run ETS2 Spotify Overlay.exe.  
+7. Click the "Install plugin" button to install the game plugin.  
+8. Click the "Connect to Spotify" button to link your account.
 
 ## **Usage**
 
